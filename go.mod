@@ -8,4 +8,5 @@ require (
 	github.com/google/wire v0.4.0
 	go.mongodb.org/mongo-driver v1.5.0
 	google.golang.org/grpc v1.33.2
+	gopkg.in/elazarl/goproxy.v1 v1.0.0-20180725130230-947c36da3153
 )

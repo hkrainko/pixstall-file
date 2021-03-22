@@ -11,6 +11,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"time"
 )
 
@@ -47,18 +49,70 @@ func main() {
 	}()
 	_ = dbClient.Database("pixstall-file")
 
+	// Proxy
+	//proxy := goproxy.NewProxyHttpServer()
+	//proxy.Verbose = true
+	//proxy.OnRequest().HandleConnect(goproxy.AlwaysMitm)
+	//proxy.OnRequest(goproxy.ReqHostMatches(regexp.MustCompile("amazonaws.com$"))).DoFunc(func(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
+	//	ctx.Logf("%v", "We can see what APIs are being called!")
+	//	return req, ctx.Resp
+	//})
+	//proxy.OnResponse().DoFunc(func(resp *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
+	//	ctx.Logf("%v", "We can modify some data coming back!")
+	//	return resp
+	//})
+	//
+	//proxy.OnRequest().DoFunc(
+	//	func(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
+	//		fmt.Printf("req:%v", req.PostForm)
+	//		print("%v", awsS3.Endpoint)
+	//		return req, nil
+	//	},
+	//)
+	//
+	//err = http.ListenAndServe(":9006", proxy)
 
+	// Gin
 	r := gin.Default()
-
 	//userIDExtractor := middleware.NewJWTPayloadsExtractor([]string{"userId"})
 
-	apiGroup := r.Group("/file")
+	artworkGroup := r.Group("/artwork")
 
-	imageGroup := apiGroup.Group("/img")
+	//imageGroup := fileGroup.Group("/img")
 	{
-		imageGroup.GET("/:id", func(ctx *gin.Context) {
+		artworkGroup.GET("/:id", func(c *gin.Context) {
 			print("Get")
-			ctx.AbortWithStatus(http.StatusOK)
+			//ctx.AbortWithStatus(http.StatusOK)
+			//director := func(req *http.Request) {
+			//	req = ctx.Request
+			//	req.URL.Scheme = "http"
+			//	req.URL.Host = "https://pixstall-store-dev.s3.ap-east-1.amazonaws.com/"
+			//	req.Host = "https://pixstall-store-dev.s3.ap-east-1.amazonaws.com/"
+			//	req.Header["my-header"] = []string{ctx.Request.Header.Get("my-header")}
+			//	// Golang camelcases headers
+			//	delete(req.Header, "My-Header")
+			//}
+			//proxy := &httputil.ReverseProxy{Director: director}
+			//proxy.ServeHTTP(ctx.Writer, ctx.Request)
+
+			remote, err := url.Parse("https://pixstall-store-dev.s3.ap-east-1.amazonaws.com")
+			if err != nil {
+				panic(err)
+			}
+
+			proxy := httputil.NewSingleHostReverseProxy(remote)
+			//Define the director func
+			//This is a good place to log, for example
+			proxy.Director = func(req *http.Request) {
+				req.Header = c.Request.Header
+				req.Host = remote.Host
+				req.URL.Scheme = remote.Scheme
+				req.URL.Host = remote.Host
+				//req.URL.Path = c.Param("proxyPath")
+				req.RequestURI = c.Request.RequestURI
+			}
+
+			proxy.ServeHTTP(c.Writer, c.Request)
 		})
 
 
@@ -73,6 +127,6 @@ func main() {
 		//artistGroup.POST("/:id/open-commissions", userIDExtractor.ExtractPayloadsFromJWT, ctrl.AddOpenCommissionForArtist)
 	}
 
-	err = r.Run(":9006")
+	err = r.Run(":9007")
 	print(err)
 }
