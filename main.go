@@ -57,29 +57,6 @@ func main() {
 	}()
 	_ = dbClient.Database("pixstall-file")
 
-	// Proxy
-	//proxy := goproxy.NewProxyHttpServer()
-	//proxy.Verbose = true
-	//proxy.OnRequest().HandleConnect(goproxy.AlwaysMitm)
-	//proxy.OnRequest(goproxy.ReqHostMatches(regexp.MustCompile("amazonaws.com$"))).DoFunc(func(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
-	//	ctx.Logf("%v", "We can see what APIs are being called!")
-	//	return req, ctx.Resp
-	//})
-	//proxy.OnResponse().DoFunc(func(resp *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
-	//	ctx.Logf("%v", "We can modify some data coming back!")
-	//	return resp
-	//})
-	//
-	//proxy.OnRequest().DoFunc(
-	//	func(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
-	//		fmt.Printf("req:%v", req.PostForm)
-	//		print("%v", awsS3.Endpoint)
-	//		return req, nil
-	//	},
-	//)
-	//
-	//err = http.ListenAndServe(":9006", proxy)
-
 	// Gin
 	r := gin.Default()
 	//userIDExtractor := middleware.NewJWTPayloadsExtractor([]string{"userId"})
