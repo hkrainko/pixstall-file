@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -10,10 +12,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"time"
+)
+
+const (
+	BucketName = "pixstall-store-dev"
 )
 
 func main() {
@@ -30,11 +37,12 @@ func main() {
 			Region:                        aws.String(endpoints.ApEast1RegionID),
 			CredentialsChainVerboseErrors: aws.Bool(true),
 			Credentials:                   creds,
+			//DisableRestProtocolURICleaning: aws.Bool(true),
 		},
 		//Profile:                 "default", //[default], use [prod], [uat]
 		//SharedConfigState:       session.SharedConfigEnable,
 	}))
-	_ = s3.New(sess)
+	awsS3 := s3.New(sess)
 
 	//Mongo
 	dbClient, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
@@ -81,19 +89,38 @@ func main() {
 	//imageGroup := fileGroup.Group("/img")
 	{
 		artworkGroup.GET("/:id", func(c *gin.Context) {
-			print("Get")
-			//ctx.AbortWithStatus(http.StatusOK)
-			//director := func(req *http.Request) {
-			//	req = ctx.Request
-			//	req.URL.Scheme = "http"
-			//	req.URL.Host = "https://pixstall-store-dev.s3.ap-east-1.amazonaws.com/"
-			//	req.Host = "https://pixstall-store-dev.s3.ap-east-1.amazonaws.com/"
-			//	req.Header["my-header"] = []string{ctx.Request.Header.Get("my-header")}
-			//	// Golang camelcases headers
-			//	delete(req.Header, "My-Header")
-			//}
-			//proxy := &httputil.ReverseProxy{Director: director}
-			//proxy.ServeHTTP(ctx.Writer, ctx.Request)
+
+			out, err := awsS3.GetObject(&s3.GetObjectInput{
+				Bucket:                     aws.String(BucketName),
+				Key:                        aws.String(c.Request.RequestURI),
+			})
+			if err != nil {
+				if aerr, ok := err.(awserr.Error); ok {
+					switch aerr.Code() {
+					case s3.ErrCodeNoSuchKey:
+						fmt.Println(s3.ErrCodeNoSuchKey, aerr.Error())
+					default:
+						fmt.Println(aerr.Error())
+					}
+				} else {
+					// Print the error, cast err to awserr.Error to get the Code and
+					// Message from an error.
+					fmt.Println(err.Error())
+				}
+				c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
+				return
+			}
+			b, err := ioutil.ReadAll(out.Body)
+			defer out.Body.Close()
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
+				return
+			}
+			c.Data(http.StatusOK, *out.ContentType, b)
+			return
+
+
+
 
 			remote, err := url.Parse("https://pixstall-store-dev.s3.ap-east-1.amazonaws.com")
 			if err != nil {
