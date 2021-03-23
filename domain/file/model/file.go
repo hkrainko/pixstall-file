@@ -1,10 +1,20 @@
 package model
 
-import "mime/multipart"
-
 type File struct {
-	multipart.File
+	Data        []byte
 	Name        string
 	ContentType string
 	Volume      int64
 }
+
+type FileType string
+
+const (
+	FileTypeMessage = "msg"
+	FileTypeCompletion = "completion"
+	FileTypeCommissionRefImg = "commission-ref-img"
+	FileTypeArtwork = "artwork"
+	FileTypeRoof = "roof"
+	FileTypeOpenCommission = "open-commission"
+	FileTypeProfile = "profile"
+)

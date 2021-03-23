@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -12,10 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"io/ioutil"
-	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"time"
 )
 
@@ -55,69 +49,70 @@ func main() {
 			panic(err)
 		}
 	}()
-	_ = dbClient.Database("pixstall-file")
+	db := dbClient.Database("pixstall-file")
 
 	// Gin
 	r := gin.Default()
 	//userIDExtractor := middleware.NewJWTPayloadsExtractor([]string{"userId"})
 
-	artworkGroup := r.Group("/artwork")
-
-	//imageGroup := fileGroup.Group("/img")
+	imgGroup := r.Group("/img")
 	{
-		artworkGroup.GET("/:id", func(c *gin.Context) {
+		ctrl := InitImageController(db, awsS3)
+		imgGroup.GET("/:imgType/:sizeType/:yyyy/:mm/:dd/:imgName", ctrl.GetImage)
 
-			out, err := awsS3.GetObject(&s3.GetObjectInput{
-				Bucket:                     aws.String(BucketName),
-				Key:                        aws.String(c.Request.RequestURI),
-			})
-			if err != nil {
-				if aerr, ok := err.(awserr.Error); ok {
-					switch aerr.Code() {
-					case s3.ErrCodeNoSuchKey:
-						fmt.Println(s3.ErrCodeNoSuchKey, aerr.Error())
-					default:
-						fmt.Println(aerr.Error())
-					}
-				} else {
-					// Print the error, cast err to awserr.Error to get the Code and
-					// Message from an error.
-					fmt.Println(err.Error())
-				}
-				c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
-				return
-			}
-			b, err := ioutil.ReadAll(out.Body)
-			defer out.Body.Close()
-			if err != nil {
-				c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
-				return
-			}
-			c.Data(http.StatusOK, *out.ContentType, b)
-			return
+		//imgGroup.GET("/:id", func(c *gin.Context) {
+		//
+		//	out, err := awsS3.GetObject(&s3.GetObjectInput{
+		//		Bucket:                     aws.String(BucketName),
+		//		Key:                        aws.String(c.Request.RequestURI),
+		//	})
+		//	if err != nil {
+		//		if aerr, ok := err.(awserr.Error); ok {
+		//			switch aerr.Code() {
+		//			case s3.ErrCodeNoSuchKey:
+		//				fmt.Println(s3.ErrCodeNoSuchKey, aerr.Error())
+		//			default:
+		//				fmt.Println(aerr.Error())
+		//			}
+		//		} else {
+		//			// Print the error, cast err to awserr.Error to get the Code and
+		//			// Message from an error.
+		//			fmt.Println(err.Error())
+		//		}
+		//		c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
+		//		return
+		//	}
+		//	b, err := ioutil.ReadAll(out.Body)
+		//	defer out.Body.Close()
+		//	if err != nil {
+		//		c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
+		//		return
+		//	}
+		//	c.Data(http.StatusOK, *out.ContentType, b)
+		//	return
 
 
 
 
-			remote, err := url.Parse("https://pixstall-store-dev.s3.ap-east-1.amazonaws.com")
-			if err != nil {
-				panic(err)
-			}
-
-			proxy := httputil.NewSingleHostReverseProxy(remote)
-			//Define the director func
-			//This is a good place to log, for example
-			proxy.Director = func(req *http.Request) {
-				req.Header = c.Request.Header
-				req.Host = remote.Host
-				req.URL.Scheme = remote.Scheme
-				req.URL.Host = remote.Host
-				//req.URL.Path = c.Param("proxyPath")
-				req.RequestURI = c.Request.RequestURI
-			}
-
-			proxy.ServeHTTP(c.Writer, c.Request)
-		})
+			//remote, err := url.Parse("https://pixstall-store-dev.s3.ap-east-1.amazonaws.com")
+			//if err != nil {
+			//	panic(err)
+			//}
+			//
+			//proxy := httputil.NewSingleHostReverseProxy(remote)
+			////Define the director func
+			////This is a good place to log, for example
+			//proxy.Director = func(req *http.Request) {
+			//	req.Header = c.Request.Header
+			//	req.Host = remote.Host
+			//	req.URL.Scheme = remote.Scheme
+			//	req.URL.Host = remote.Host
+			//	//req.URL.Path = c.Param("proxyPath")
+			//	req.RequestURI = c.Request.RequestURI
+			//}
+			//
+			//proxy.ServeHTTP(c.Writer, c.Request)
+		//})
 
 
 		//ctrl := InitArtistController(db, awsS3)
@@ -129,6 +124,12 @@ func main() {
 		//artistGroup.GET("/:id/open-commissions", ctrl.GetOpenCommissionsForArtist)
 		//artistGroup.GET("/:id/open-commissions/details", userIDExtractor.ExtractPayloadsFromJWT, ctrl.GetOpenCommissionsDetailsForArtist)
 		//artistGroup.POST("/:id/open-commissions", userIDExtractor.ExtractPayloadsFromJWT, ctrl.AddOpenCommissionForArtist)
+	}
+
+	completionFileGroup := r.Group("/file")
+	{
+		ctrl := InitFileController(db, awsS3)
+		completionFileGroup.GET("/completion/*action", ctrl.GetCompletionFile)
 	}
 
 	err = r.Run(":9007")

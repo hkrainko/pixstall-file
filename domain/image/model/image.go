@@ -12,3 +12,12 @@ type Size struct {
 	Height float64 `json:"height" bson:"height"`
 	Unit   string  `json:"unit" bson:"unit"`
 }
+
+type ImageSizeType string
+
+const (
+	ImageSizeTypeSmall = "xs"
+	ImageSizeTypeMiddle = "md"
+	ImageSizeTypeLarge = "lg"
+	ImageSizeTypeRaw = "raw"
+)
