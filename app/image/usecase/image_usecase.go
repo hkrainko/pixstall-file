@@ -3,18 +3,21 @@ package usecase
 import (
 	"context"
 	"pixstall-file/domain/file"
+	"pixstall-file/domain/file/acl"
 	model2 "pixstall-file/domain/file/model"
 	"pixstall-file/domain/image"
 	"pixstall-file/domain/image/model"
 )
 
 type imageUseCase struct {
-	fileRepo file.Repo
+	fileRepo    file.Repo
+	fileACLRepo acl.Repo
 }
 
-func NewImageUseCase(fileRepo file.Repo) image.UseCase {
+func NewImageUseCase(fileRepo file.Repo, fileACLRepo acl.Repo) image.UseCase {
 	return imageUseCase{
-		fileRepo: fileRepo,
+		fileRepo:    fileRepo,
+		fileACLRepo: fileACLRepo,
 	}
 }
 

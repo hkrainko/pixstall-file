@@ -1,11 +1,12 @@
 package aws_s3
 
 import (
+	"bytes"
 	"context"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"pixstall-file/domain/file"
 	model2 "pixstall-file/domain/file/model"
-	"pixstall-file/domain/image/model"
 )
 
 type awsS3FileRepository struct {
@@ -22,23 +23,28 @@ func NewAWSS3FileRepository(s3 *s3.S3) file.Repo {
 	}
 }
 
-func (a awsS3FileRepository) SaveImage(ctx context.Context, image model.Image, path string) (*string, error) {
-	panic("implement me")
+func (a awsS3FileRepository) SaveFile(ctx context.Context, file model2.File, dir string) (*string, error) {
+
+	uploadPath := dir
+	// convert buffer to reader
+	reader := bytes.NewReader(file.Data)
+
+	// use it in `PutObjectInput`
+	_, err := a.s3.PutObjectWithContext(ctx, &s3.PutObjectInput{
+		Bucket:      aws.String(BucketName),
+		Key:         aws.String(uploadPath),
+		Body:        reader,
+		ContentType: aws.String(file.ContentType),
+		ACL:         aws.String("public-read"), //profile should be public accessible
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return &uploadPath, nil
 }
 
-func (a awsS3FileRepository) SaveImages(ctx context.Context, pathImages []model.Image, path string) ([]string, error) {
-	panic("implement me")
-}
-
-func (a awsS3FileRepository) SaveFile(ctx context.Context, pathFile model2.File, path string) (*string, error) {
-	panic("implement me")
-}
-
-func (a awsS3FileRepository) SaveFiles(ctx context.Context, pathImages []model2.File, path string) ([]string, error) {
-	panic("implement me")
-}
-
-func (a awsS3FileRepository) GetImage(ctx context.Context, path string) (*model.Image, error) {
+func (a awsS3FileRepository) SaveFiles(ctx context.Context, files []model2.File, dir string) ([]string, error) {
 	panic("implement me")
 }
 

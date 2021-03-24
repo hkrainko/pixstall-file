@@ -1,0 +1,27 @@
+//cmd: protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/file.proto
+syntax = "proto3";
+
+option go_package = ".;proto";
+
+service FileService {
+  rpc SaveFile (SaveFileRequest) returns (SaveFileResponse);
+}
+
+message SaveFileRequest {
+  bytes file = 1;
+  FileType fileType = 2;
+
+  enum FileType {
+    Message = 0;
+    Completion = 1;
+    CommissionRefImg = 2;
+    Artwork = 3;
+    Roof = 4;
+    OpenCommission = 5;
+    Profile = 6;
+  }
+}
+
+message SaveFileResponse {
+  string path = 1;
+}

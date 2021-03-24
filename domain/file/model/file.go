@@ -2,19 +2,19 @@ package model
 
 type File struct {
 	Data        []byte
-	Name        string
+	FileType    FileType
 	ContentType string
-	Volume      int64
+	IsPublic    bool
 }
 
 type FileType string
 
 const (
-	FileTypeMessage = "msg"
-	FileTypeCompletion = "completion"
+	FileTypeMessage          = "msg"
+	FileTypeCompletion       = "completion"
 	FileTypeCommissionRefImg = "commission-ref-img"
-	FileTypeArtwork = "artwork"
-	FileTypeRoof = "roof"
-	FileTypeOpenCommission = "open-commission"
-	FileTypeProfile = "profile"
+	FileTypeArtwork          = "artwork"
+	FileTypeRoof             = "roof"
+	FileTypeOpenCommission   = "open-commission"
+	FileTypeProfile          = "profile"
 )

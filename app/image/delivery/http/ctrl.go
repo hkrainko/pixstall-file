@@ -6,7 +6,6 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"path/filepath"
-	"pixstall-file/domain/file/model"
 	"pixstall-file/domain/image"
 )
 
@@ -22,12 +21,6 @@ func NewImageController(useCase image.UseCase) ImageController {
 
 func (i ImageController)GetImage(ctx *gin.Context) {
 	tokenUserID := ctx.GetString("userId")
-
-	imgType, exist := ctx.GetQuery("imgType")
-	if !exist {
-		ctx.AbortWithStatus(http.StatusNotFound)
-		return
-	}
 	imgName, exist := ctx.GetQuery("imgName")
 	if !exist {
 		ctx.AbortWithStatus(http.StatusNotFound)
@@ -41,16 +34,6 @@ func (i ImageController)GetImage(ctx *gin.Context) {
 	prefix := imgName[0:len(imgName) - len(ext)]
 	if prefix == "" {
 		ctx.AbortWithStatus(http.StatusNotFound)
-		return
-	}
-	isPublic, err := i.useCase.IsPublic(ctx, model.FileType(imgType), prefix)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	if *isPublic {
-		// TODO: Allow private only?
-		i.proxy(ctx)
 		return
 	}
 	img, err := i.useCase.GetImage(ctx, &tokenUserID, prefix, ext, ctx.FullPath())

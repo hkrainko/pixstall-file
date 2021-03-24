@@ -16,8 +16,11 @@ func NewFileUseCase(fileRepo file.Repo) file.UseCase {
 	}
 }
 
-func (f fileUseCase) SaveFile(ctx context.Context, file model2.File, dir string) (*string, error) {
-	panic("implement me")
+func (f fileUseCase) SaveFile(ctx context.Context, fileData []byte, fileType model2.FileType) (*string, error) {
+
+
+
+	f.fileRepo.SaveFile()
 }
 
 func (f fileUseCase) GetFile(ctx context.Context, userID string, path string) (*model2.File, error) {
