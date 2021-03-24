@@ -5,6 +5,8 @@ type File struct {
 	FileType    FileType
 	ContentType string
 	IsPublic    bool
+	Path        string
+	RawPath     string
 }
 
 type FileType string

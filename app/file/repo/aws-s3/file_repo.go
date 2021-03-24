@@ -23,16 +23,14 @@ func NewAWSS3FileRepository(s3 *s3.S3) file.Repo {
 	}
 }
 
-func (a awsS3FileRepository) SaveFile(ctx context.Context, file model2.File, dir string) (*string, error) {
-
-	uploadPath := dir
+func (a awsS3FileRepository) SaveFile(ctx context.Context, file model2.File) (*string, error) {
 	// convert buffer to reader
 	reader := bytes.NewReader(file.Data)
 
 	// use it in `PutObjectInput`
 	_, err := a.s3.PutObjectWithContext(ctx, &s3.PutObjectInput{
 		Bucket:      aws.String(BucketName),
-		Key:         aws.String(uploadPath),
+		Key:         aws.String(file.Path),
 		Body:        reader,
 		ContentType: aws.String(file.ContentType),
 		ACL:         aws.String("public-read"), //profile should be public accessible
@@ -41,11 +39,28 @@ func (a awsS3FileRepository) SaveFile(ctx context.Context, file model2.File, dir
 	if err != nil {
 		return nil, err
 	}
-	return &uploadPath, nil
+	return &file.Path, nil
 }
 
-func (a awsS3FileRepository) SaveFiles(ctx context.Context, files []model2.File, dir string) ([]string, error) {
-	panic("implement me")
+func (a awsS3FileRepository) SaveFiles(ctx context.Context, files []model2.File) ([]string, error) {
+	var resultPaths []string
+	for _, dFile := range files {
+		// convert buffer to reader
+		reader := bytes.NewReader(dFile.Data)
+
+		// use it in `PutObjectInput`
+		_, err := a.s3.PutObjectWithContext(ctx, &s3.PutObjectInput{
+			Bucket: aws.String(BucketName),
+			Key:    aws.String(dFile.Path),
+			Body:   reader,
+			ContentType: aws.String("image"),
+			ACL: aws.String("public-read"),  //profile should be public accessible
+		})
+		if err == nil {
+			resultPaths = append(resultPaths, dFile.Path)
+		}
+	}
+	return resultPaths, nil
 }
 
 func (a awsS3FileRepository) GetFile(ctx context.Context, path string) (*model2.File, error) {

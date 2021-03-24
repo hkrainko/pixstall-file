@@ -6,7 +6,7 @@ import (
 )
 
 type Repo interface {
-	SaveFile(ctx context.Context, file model2.File, dir string) (*string, error)
-	SaveFiles(ctx context.Context, images []model2.File, dir string) ([]string, error)
+	SaveFile(ctx context.Context, file model2.File) (*string, error)
+	SaveFiles(ctx context.Context, files []model2.File) ([]string, error)
 	GetFile(ctx context.Context, path string) (*model2.File, error)
 }
