@@ -4,7 +4,7 @@ syntax = "proto3";
 option go_package = ".;proto";
 
 service FileService {
-  rpc SaveFile (SaveFileRequest) returns (SaveFileResponse);
+  rpc SaveFile (stream SaveFileRequest) returns (SaveFileResponse);
 }
 
 message SaveFileRequest {

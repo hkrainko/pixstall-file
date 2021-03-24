@@ -17,7 +17,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FileServiceClient interface {
-	SaveFile(ctx context.Context, in *SaveFileRequest, opts ...grpc.CallOption) (*SaveFileResponse, error)
+	SaveFile(ctx context.Context, opts ...grpc.CallOption) (FileService_SaveFileClient, error)
 }
 
 type fileServiceClient struct {
@@ -28,20 +28,45 @@ func NewFileServiceClient(cc grpc.ClientConnInterface) FileServiceClient {
 	return &fileServiceClient{cc}
 }
 
-func (c *fileServiceClient) SaveFile(ctx context.Context, in *SaveFileRequest, opts ...grpc.CallOption) (*SaveFileResponse, error) {
-	out := new(SaveFileResponse)
-	err := c.cc.Invoke(ctx, "/FileService/SaveFile", in, out, opts...)
+func (c *fileServiceClient) SaveFile(ctx context.Context, opts ...grpc.CallOption) (FileService_SaveFileClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_FileService_serviceDesc.Streams[0], "/FileService/SaveFile", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &fileServiceSaveFileClient{stream}
+	return x, nil
+}
+
+type FileService_SaveFileClient interface {
+	Send(*SaveFileRequest) error
+	CloseAndRecv() (*SaveFileResponse, error)
+	grpc.ClientStream
+}
+
+type fileServiceSaveFileClient struct {
+	grpc.ClientStream
+}
+
+func (x *fileServiceSaveFileClient) Send(m *SaveFileRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *fileServiceSaveFileClient) CloseAndRecv() (*SaveFileResponse, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(SaveFileResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // FileServiceServer is the server API for FileService service.
 // All implementations must embed UnimplementedFileServiceServer
 // for forward compatibility
 type FileServiceServer interface {
-	SaveFile(context.Context, *SaveFileRequest) (*SaveFileResponse, error)
+	SaveFile(FileService_SaveFileServer) error
 	mustEmbedUnimplementedFileServiceServer()
 }
 
@@ -49,8 +74,8 @@ type FileServiceServer interface {
 type UnimplementedFileServiceServer struct {
 }
 
-func (UnimplementedFileServiceServer) SaveFile(context.Context, *SaveFileRequest) (*SaveFileResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SaveFile not implemented")
+func (UnimplementedFileServiceServer) SaveFile(FileService_SaveFileServer) error {
+	return status.Errorf(codes.Unimplemented, "method SaveFile not implemented")
 }
 func (UnimplementedFileServiceServer) mustEmbedUnimplementedFileServiceServer() {}
 
@@ -65,33 +90,42 @@ func RegisterFileServiceServer(s grpc.ServiceRegistrar, srv FileServiceServer) {
 	s.RegisterService(&_FileService_serviceDesc, srv)
 }
 
-func _FileService_SaveFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SaveFileRequest)
-	if err := dec(in); err != nil {
+func _FileService_SaveFile_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(FileServiceServer).SaveFile(&fileServiceSaveFileServer{stream})
+}
+
+type FileService_SaveFileServer interface {
+	SendAndClose(*SaveFileResponse) error
+	Recv() (*SaveFileRequest, error)
+	grpc.ServerStream
+}
+
+type fileServiceSaveFileServer struct {
+	grpc.ServerStream
+}
+
+func (x *fileServiceSaveFileServer) SendAndClose(m *SaveFileResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *fileServiceSaveFileServer) Recv() (*SaveFileRequest, error) {
+	m := new(SaveFileRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(FileServiceServer).SaveFile(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/FileService/SaveFile",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FileServiceServer).SaveFile(ctx, req.(*SaveFileRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return m, nil
 }
 
 var _FileService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "FileService",
 	HandlerType: (*FileServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "SaveFile",
-			Handler:    _FileService_SaveFile_Handler,
+			StreamName:    "SaveFile",
+			Handler:       _FileService_SaveFile_Handler,
+			ClientStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "proto/file.proto",
 }
