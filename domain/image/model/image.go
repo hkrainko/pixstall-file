@@ -13,11 +13,18 @@ type Size struct {
 	Unit   string  `json:"unit" bson:"unit"`
 }
 
-type ImageSizeType string
+type ImageScale string
 
 const (
-	ImageSizeTypeSmall = "xs"
-	ImageSizeTypeMiddle = "md"
-	ImageSizeTypeLarge = "lg"
-	ImageSizeTypeRaw = "raw"
+	ImageScaleSmall ImageScale = "xs"
+	ImageScaleMiddle ImageScale = "md"
+	ImageScaleLarge ImageScale = "lg"
+	ImageScaleRaw ImageScale = "raw"
 )
+
+func (i ImageScale) PathSuffix() string {
+	if i == ImageScaleRaw {
+		return ""
+	}
+	return "_" + string(i)
+}

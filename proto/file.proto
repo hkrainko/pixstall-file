@@ -8,8 +8,10 @@ service FileService {
 }
 
 message SaveFileRequest {
-  bytes file = 1;
-  FileType fileType = 2;
+  oneof data {
+    bytes file = 1;
+    FileType fileType = 2;
+  }
 
   enum FileType {
     Message = 0;

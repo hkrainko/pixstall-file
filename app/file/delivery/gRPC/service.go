@@ -1,7 +1,9 @@
 package gRPC
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"pixstall-file/domain/file"
 	"pixstall-file/domain/file/model"
@@ -19,34 +21,37 @@ func NewFileService(fileUseCase file.UseCase) FileService {
 	}
 }
 
-func (f FileService) SaveFile(server proto.FileService_SaveFileServer) error {
-	var pointCount, featureCount, distance int32
-	var lastPoint *pb.Point
+func (f FileService) SaveFile(stream proto.FileService_SaveFileServer) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
+	defer cancel()
+	buf := bytes.NewBuffer([]byte{})
+
 	startTime := time.Now()
+	req, err := stream.Recv()
+	if err != nil {
+		return err
+	}
+	fileType := req.GetFileType()
+
 	for {
-		point, err := stream.Recv()
+		req, err := stream.Recv()
 		if err == io.EOF {
 			endTime := time.Now()
-			return stream.SendAndClose(&pb.RouteSummary{
-				PointCount:   pointCount,
-				FeatureCount: featureCount,
-				Distance:     distance,
-				ElapsedTime:  int32(endTime.Sub(startTime).Seconds()),
+			recFile := buf.Bytes()
+
+			path, err := f.fileUseCase.SaveFile(ctx, &recFile, model.FileType(fileType))
+			if err != nil {
+				return err
+			}
+			fmt.Printf("SaveFile used: %v(s)", endTime.Sub(startTime))
+			return stream.SendAndClose(&proto.SaveFileResponse{
+				Path: *path,
 			})
 		}
 		if err != nil {
 			return err
 		}
-		pointCount++
-		for _, feature := range s.savedFeatures {
-			if proto.Equal(feature.Location, point) {
-				featureCount++
-			}
-		}
-		if lastPoint != nil {
-			distance += calcDistance(lastPoint, point)
-		}
-		lastPoint = point
+		buf.Write(req.GetFile())
 	}
 }
 
