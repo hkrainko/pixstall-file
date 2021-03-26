@@ -21,8 +21,8 @@ func NewImageController(useCase image.UseCase) ImageController {
 
 func (i ImageController)GetImage(ctx *gin.Context) {
 	tokenUserID := ctx.GetString("userId")
-	imgName, exist := ctx.GetQuery("imgName")
-	if !exist {
+	imgName := ctx.Param("imgName")
+	if imgName == "" {
 		ctx.AbortWithStatus(http.StatusNotFound)
 		return
 	}
@@ -36,16 +36,20 @@ func (i ImageController)GetImage(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	img, err := i.useCase.GetImage(ctx, &tokenUserID, prefix, ext, ctx.FullPath())
+	accessible, err := i.useCase.IsAccessible(ctx, &tokenUserID, prefix, ext, ctx.FullPath())
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	ctx.Data(http.StatusOK, img.ContentType, img.Data)
+	if !*accessible {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	i.proxy(ctx)
 }
 
 func (i ImageController)proxy(ctx *gin.Context) {
-	remote, err := url.Parse("https://pixstall-store-dev.s3.ap-east-1.amazonaws.com")
+	remote, err := url.Parse("https://d1kazwr29qo5il.cloudfront.net")
 	if err != nil {
 		panic(err)
 	}

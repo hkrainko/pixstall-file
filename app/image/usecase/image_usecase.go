@@ -4,7 +4,6 @@ import (
 	"context"
 	"pixstall-file/domain/file"
 	"pixstall-file/domain/file/acl"
-	model2 "pixstall-file/domain/file/model"
 	"pixstall-file/domain/image"
 	"pixstall-file/domain/image/model"
 )
@@ -29,11 +28,7 @@ func (i imageUseCase) SaveImages(ctx context.Context, images []model.Image, dir 
 	panic("implement me")
 }
 
-func (i imageUseCase) IsPublic(ctx context.Context, imgType model2.FileType, prefix string) (*bool, error) {
-	result := false
+func (i imageUseCase) IsAccessible(ctx context.Context, userID *string, prefix string, ext string, fullPath string) (*bool, error) {
+	result := true
 	return &result, nil
-}
-
-func (i imageUseCase) GetImage(ctx context.Context, userID *string, prefix string, ext string, fullPath string) (*model.Image, error) {
-	panic("implement me")
 }

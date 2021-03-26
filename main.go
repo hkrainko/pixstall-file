@@ -58,7 +58,7 @@ func main() {
 	imgGroup := r.Group("/pri-img")
 	{
 		ctrl := InitImageController(db, awsS3)
-		imgGroup.GET("/:imgType/:sizeType/:yyyy/:mm/:dd/:imgName", ctrl.GetImage)
+		imgGroup.GET("/:imgType/:yyyy/:mm/:dd/:imgName", ctrl.GetImage)
 
 		//imgGroup.GET("/:id", func(c *gin.Context) {
 		//
