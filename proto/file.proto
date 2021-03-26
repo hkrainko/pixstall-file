@@ -7,11 +7,10 @@ service FileService {
   rpc SaveFile (stream SaveFileRequest) returns (SaveFileResponse);
 }
 
-message SaveFileRequest {
-  oneof data {
-    bytes file = 1;
-    FileType fileType = 2;
-  }
+message MetaData {
+  FileType fileType = 2;
+  string name = 1;
+  string ext = 3;
 
   enum FileType {
     Message = 0;
@@ -21,6 +20,13 @@ message SaveFileRequest {
     Roof = 4;
     OpenCommission = 5;
     Profile = 6;
+  }
+}
+
+message SaveFileRequest {
+  oneof data {
+    MetaData metaData = 1;
+    bytes file = 2;
   }
 }
 

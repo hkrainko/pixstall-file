@@ -31,7 +31,7 @@ func (f FileService) SaveFile(stream proto.FileService_SaveFileServer) error {
 	if err != nil {
 		return err
 	}
-	fileType := req.GetFileType()
+	metaData := req.GetMetaData()
 
 	for {
 		req, err := stream.Recv()
@@ -39,7 +39,7 @@ func (f FileService) SaveFile(stream proto.FileService_SaveFileServer) error {
 			endTime := time.Now()
 			recFile := buf.Bytes()
 
-			path, err := f.fileUseCase.SaveFile(ctx, &recFile, model.FileType(fileType))
+			path, err := f.fileUseCase.SaveFile(ctx, &recFile, model.FileType(metaData.FileType), metaData.Ext)
 			if err != nil {
 				return err
 			}

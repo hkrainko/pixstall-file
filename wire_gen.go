@@ -13,6 +13,7 @@ import (
 	"pixstall-file/app/file/repo/aws-s3"
 	usecase2 "pixstall-file/app/file/usecase"
 	"pixstall-file/app/image/delivery/http"
+	"pixstall-file/app/image/image-processing/repo/imaging"
 	"pixstall-file/app/image/usecase"
 )
 
@@ -28,7 +29,8 @@ func InitImageController(db *mongo.Database, awsS3 *s3.S3) http.ImageController 
 
 func InitFileController(db *mongo.Database, awsS3 *s3.S3) http2.FileController {
 	repo := aws_s3.NewAWSS3FileRepository(awsS3)
-	useCase := usecase2.NewFileUseCase(repo)
+	image_processingRepo := imaging.NewImagingImageProcessingRepo()
+	useCase := usecase2.NewFileUseCase(repo, image_processingRepo)
 	fileController := http2.NewFileController(useCase)
 	return fileController
 }
