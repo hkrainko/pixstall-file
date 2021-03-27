@@ -9,12 +9,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"go.mongodb.org/mongo-driver/mongo"
 	mongo2 "pixstall-file/app/file/acl/repo/mongo"
+	"pixstall-file/app/file/delivery/gRPC"
 	http2 "pixstall-file/app/file/delivery/http"
 	"pixstall-file/app/file/repo/aws-s3"
-	usecase2 "pixstall-file/app/file/usecase"
+	"pixstall-file/app/file/usecase"
 	"pixstall-file/app/image/delivery/http"
 	"pixstall-file/app/image/image-processing/repo/imaging"
-	"pixstall-file/app/image/usecase"
 )
 
 // Injectors from wire.go:
@@ -22,15 +22,26 @@ import (
 func InitImageController(db *mongo.Database, awsS3 *s3.S3) http.ImageController {
 	repo := aws_s3.NewAWSS3FileRepository(awsS3)
 	aclRepo := mongo2.NewMongoFileAclRepo(db)
-	useCase := usecase.NewImageUseCase(repo, aclRepo)
+	image_processingRepo := imaging.NewImagingImageProcessingRepo()
+	useCase := usecase.NewFileUseCase(repo, aclRepo, image_processingRepo)
 	imageController := http.NewImageController(useCase)
 	return imageController
 }
 
+func InitFileStoreService(db *mongo.Database, awsS3 *s3.S3) gRPC.FileService {
+	repo := aws_s3.NewAWSS3FileRepository(awsS3)
+	aclRepo := mongo2.NewMongoFileAclRepo(db)
+	image_processingRepo := imaging.NewImagingImageProcessingRepo()
+	useCase := usecase.NewFileUseCase(repo, aclRepo, image_processingRepo)
+	fileService := gRPC.NewFileService(useCase)
+	return fileService
+}
+
 func InitFileController(db *mongo.Database, awsS3 *s3.S3) http2.FileController {
 	repo := aws_s3.NewAWSS3FileRepository(awsS3)
+	aclRepo := mongo2.NewMongoFileAclRepo(db)
 	image_processingRepo := imaging.NewImagingImageProcessingRepo()
-	useCase := usecase2.NewFileUseCase(repo, image_processingRepo)
+	useCase := usecase.NewFileUseCase(repo, aclRepo, image_processingRepo)
 	fileController := http2.NewFileController(useCase)
 	return fileController
 }

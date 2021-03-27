@@ -7,5 +7,5 @@ import (
 
 type UseCase interface {
 	SaveFile(ctx context.Context, fileData *[]byte, fileType model2.FileType, ext string) (*string, error)
-	GetFile(ctx context.Context, userID string, path string) (*model2.File, error)
+	IsAccessible(ctx context.Context, userID *string, prefix string, ext string, fullPath string) (*bool, error)
 }

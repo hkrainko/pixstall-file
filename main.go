@@ -10,6 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"google.golang.org/grpc"
+	"log"
+	"net"
+	"pixstall-file/proto"
 	"time"
 )
 
@@ -19,11 +23,6 @@ const (
 
 func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-
-	////gRPC
-	//lis, err := net.Listen("tcp", ":50052")
-	//s := grpc.NewServer()
-	//proto.RegisterFileServiceServer(s, )
 
 	//AWS s3
 	awsAccessKey := "AKIA5BWICLKRWX6ARSEF"
@@ -55,6 +54,15 @@ func main() {
 	}()
 	db := dbClient.Database("pixstall-file")
 
+	////gRPC
+	lis, err := net.Listen("tcp", ":50052")
+	s := grpc.NewServer()
+	proto.RegisterFileServiceServer(s, InitFileStoreService(db, awsS3))
+	err = s.Serve(lis)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
 	// Gin
 	r := gin.Default()
 	//userIDExtractor := middleware.NewJWTPayloadsExtractor([]string{"userId"})
@@ -63,43 +71,12 @@ func main() {
 	{
 		ctrl := InitImageController(db, awsS3)
 		imgGroup.GET("/:imgType/:yyyy/:mm/:dd/:imgName", ctrl.GetImage)
-
-		//imgGroup.GET("/:id", func(c *gin.Context) {
-		//
-		//	out, err := awsS3.GetObject(&s3.GetObjectInput{
-		//		Bucket:                     aws.String(BucketName),
-		//		Key:                        aws.String(c.Request.RequestURI),
-		//	})
-		//	if err != nil {
-		//		if aerr, ok := err.(awserr.Error); ok {
-		//			switch aerr.Code() {
-		//			case s3.ErrCodeNoSuchKey:
-		//				fmt.Println(s3.ErrCodeNoSuchKey, aerr.Error())
-		//			default:
-		//				fmt.Println(aerr.Error())
-		//			}
-		//		} else {
-		//			// Print the error, cast err to awserr.Error to get the Code and
-		//			// Message from an error.
-		//			fmt.Println(err.Error())
-		//		}
-		//		c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
-		//		return
-		//	}
-		//	b, err := ioutil.ReadAll(out.Body)
-		//	defer out.Body.Close()
-		//	if err != nil {
-		//		c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
-		//		return
-		//	}
-		//	c.Data(http.StatusOK, *out.ContentType, b)
-		//	return
 	}
 
-	completionFileGroup := r.Group("/file")
+	fileGroup := r.Group("/pri-file")
 	{
 		ctrl := InitFileController(db, awsS3)
-		completionFileGroup.GET("/completion/*action", ctrl.GetCompletionFile)
+		fileGroup.GET("/:fileType/:yyyy/:mm/:dd/:fileName", ctrl.GetFile)
 	}
 
 	err = r.Run(":9007")

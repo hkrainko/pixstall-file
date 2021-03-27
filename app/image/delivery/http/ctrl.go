@@ -6,14 +6,14 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"path/filepath"
-	"pixstall-file/domain/image"
+	"pixstall-file/domain/file"
 )
 
 type ImageController struct {
-	useCase image.UseCase
+	useCase file.UseCase
 }
 
-func NewImageController(useCase image.UseCase) ImageController {
+func NewImageController(useCase file.UseCase) ImageController {
 	return ImageController{
 		useCase: useCase,
 	}

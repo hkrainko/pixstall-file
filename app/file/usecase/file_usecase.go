@@ -5,18 +5,21 @@ import (
 	"fmt"
 	error2 "pixstall-file/domain/error"
 	"pixstall-file/domain/file"
+	"pixstall-file/domain/file/acl"
 	model2 "pixstall-file/domain/file/model"
 	image_processing "pixstall-file/domain/image/image-processing"
 )
 
 type fileUseCase struct {
 	fileRepo file.Repo
+	fileAclRepo acl.Repo
 	imageProcessingRepo image_processing.Repo
 }
 
-func NewFileUseCase(fileRepo file.Repo, imageProcessingRepo image_processing.Repo) file.UseCase {
+func NewFileUseCase(fileRepo file.Repo, fileAclRepo acl.Repo, imageProcessingRepo image_processing.Repo) file.UseCase {
 	return fileUseCase{
 		fileRepo: fileRepo,
+		fileAclRepo: fileAclRepo,
 		imageProcessingRepo: imageProcessingRepo,
 	}
 }
@@ -37,6 +40,7 @@ func (f fileUseCase) SaveFile(ctx context.Context, fileData *[]byte, fileType mo
 	return &dFiles[0].RawPath, nil
 }
 
-func (f fileUseCase) GetFile(ctx context.Context, userID string, path string) (*model2.File, error) {
-	panic("implement me")
+func (f fileUseCase) IsAccessible(ctx context.Context, userID *string, prefix string, ext string, fullPath string) (*bool, error) {
+	result := true
+	return &result, nil
 }

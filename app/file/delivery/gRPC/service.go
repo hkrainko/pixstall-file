@@ -13,6 +13,7 @@ import (
 
 type FileService struct {
 	fileUseCase  file.UseCase
+	proto.UnimplementedFileServiceServer
 }
 
 func NewFileService(fileUseCase file.UseCase) FileService {
@@ -54,17 +55,3 @@ func (f FileService) SaveFile(stream proto.FileService_SaveFileServer) error {
 		buf.Write(req.GetFile())
 	}
 }
-
-func (f FileService) mustEmbedUnimplementedFileServiceServer() {
-	panic("implement me")
-}
-
-//func (f FileService) SaveFile(ctx context.Context, request *proto.SaveFileRequest) (*proto.SaveFileResponse, error) {
-//	path, err := f.fileUseCase.SaveFile(ctx, request.File, model.FileType(request.FileType))
-//	if err != nil {
-//		return nil, err
-//	}
-//	return &proto.SaveFileResponse{
-//		Path: *path,
-//	}, nil
-//}
