@@ -15,13 +15,14 @@ message MetaData {
   enum FileType {
     Message = 0;
     Completion = 1;
-    CommissionRefImg = 2;
-    ArtworkHidden = 3;
-    Artwork = 4;
-    Roof = 5;
-    OpenCommission = 6;
-    OpenCommissionHidden = 7;
-    Profile = 8;
+    CommissionRef = 2;
+    CommissionProofCopy = 3;
+    ArtworkHidden = 4;
+    Artwork = 5;
+    Roof = 6;
+    OpenCommission = 7;
+    OpenCommissionHidden = 8;
+    Profile = 9;
   }
 }
 

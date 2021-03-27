@@ -3,6 +3,7 @@ package gRPC
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"pixstall-file/domain/file"
@@ -33,6 +34,10 @@ func (f FileService) SaveFile(stream proto.FileService_SaveFileServer) error {
 		return err
 	}
 	metaData := req.GetMetaData()
+	fileType, err := f.domainFileTypeFormGRPC(metaData.FileType)
+	if err != nil {
+		return err
+	}
 
 	for {
 		req, err := stream.Recv()
@@ -40,7 +45,8 @@ func (f FileService) SaveFile(stream proto.FileService_SaveFileServer) error {
 			endTime := time.Now()
 			recFile := buf.Bytes()
 
-			path, err := f.fileUseCase.SaveFile(ctx, &recFile, model.FileType(metaData.FileType), metaData.Ext)
+
+			path, err := f.fileUseCase.SaveFile(ctx, &recFile, fileType, metaData.Ext)
 			if err != nil {
 				return err
 			}
@@ -53,5 +59,32 @@ func (f FileService) SaveFile(stream proto.FileService_SaveFileServer) error {
 			return err
 		}
 		buf.Write(req.GetFile())
+	}
+}
+
+func (f FileService) domainFileTypeFormGRPC(gFileType proto.MetaData_FileType) (model.FileType, error) {
+	switch gFileType {
+	case proto.MetaData_Message:
+		return model.FileTypeMessage, nil
+	case proto.MetaData_Completion:
+		return model.FileTypeCompletion, nil
+	case proto.MetaData_CommissionRef:
+		return model.FileTypeCommissionRef, nil
+	case proto.MetaData_CommissionProofCopy:
+		return model.FileTypeCommissionProofCopy, nil
+	case proto.MetaData_ArtworkHidden:
+		return model.FileTypeArtworkHidden, nil
+	case proto.MetaData_Artwork:
+		return model.FileTypeArtwork, nil
+	case proto.MetaData_Roof:
+		return model.FileTypeRoof, nil
+	case proto.MetaData_OpenCommission:
+		return model.FileTypeOpenCommission, nil
+	case proto.MetaData_OpenCommissionHidden:
+		return model.FileTypeOpenCommissionHidden, nil
+	case proto.MetaData_Profile:
+		return model.FileTypeProfile, nil
+	default:
+		return "", errors.New("not found")
 	}
 }

@@ -19,7 +19,8 @@ type FileType string
 const (
 	FileTypeMessage              = "msg"
 	FileTypeCompletion           = "completion"
-	FileTypeCommissionRefImg     = "commission-ref-img"
+	FileTypeCommissionRef        = "commission-ref"
+	FileTypeCommissionProofCopy  = "commission-proof-copy"
 	FileTypeArtworkHidden        = "artwork-hidden"
 	FileTypeArtwork              = "artwork"
 	FileTypeRoof                 = "roof"
@@ -37,8 +38,11 @@ func (f FileType) GetFileDir() string {
 	case FileTypeCompletion:
 		result = "pri-file/completion/"
 		break
-	case FileTypeCommissionRefImg:
+	case FileTypeCommissionRef:
 		result = "pri-img/commission-ref/"
+		break
+	case FileTypeCommissionProofCopy:
+		result = "pri-img/commission-proof-copy/"
 		break
 	case FileTypeArtworkHidden:
 		result = "pri-img/artwork/"

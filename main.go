@@ -58,7 +58,7 @@ func main() {
 	lis, err := net.Listen("tcp", ":50052")
 	s := grpc.NewServer()
 	proto.RegisterFileServiceServer(s, InitFileStoreService(db, awsS3))
-	err = s.Serve(lis)
+	go s.Serve(lis)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
