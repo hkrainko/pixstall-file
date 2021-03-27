@@ -46,7 +46,7 @@ func (f FileService) SaveFile(stream proto.FileService_SaveFileServer) error {
 			recFile := buf.Bytes()
 
 
-			path, err := f.fileUseCase.SaveFile(ctx, &recFile, fileType, metaData.Name)
+			path, err := f.fileUseCase.SaveFile(ctx, &recFile, fileType, metaData.Name, metaData.Owner, metaData.Acl)
 			if err != nil {
 				return err
 			}
@@ -72,16 +72,12 @@ func (f FileService) domainFileTypeFormGRPC(gFileType proto.MetaData_FileType) (
 		return model.FileTypeCommissionRef, nil
 	case proto.MetaData_CommissionProofCopy:
 		return model.FileTypeCommissionProofCopy, nil
-	case proto.MetaData_ArtworkHidden:
-		return model.FileTypeArtworkHidden, nil
 	case proto.MetaData_Artwork:
 		return model.FileTypeArtwork, nil
 	case proto.MetaData_Roof:
 		return model.FileTypeRoof, nil
 	case proto.MetaData_OpenCommission:
 		return model.FileTypeOpenCommission, nil
-	case proto.MetaData_OpenCommissionHidden:
-		return model.FileTypeOpenCommissionHidden, nil
 	case proto.MetaData_Profile:
 		return model.FileTypeProfile, nil
 	default:

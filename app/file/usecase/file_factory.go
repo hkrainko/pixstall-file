@@ -73,11 +73,6 @@ func (f FileFactory) getScaleWidthMap(fileType model2.FileType) map[model.ImageS
 	case model2.FileTypeCommissionProofCopy:
 		result[model.ImageScaleMiddle] = 200
 		break
-	case model2.FileTypeArtworkHidden:
-		result[model.ImageScaleLarge] = 600
-		result[model.ImageScaleMiddle] = 200
-		result[model.ImageScaleSmall] = 50
-		break
 	case model2.FileTypeArtwork:
 		result[model.ImageScaleLarge] = 600
 		result[model.ImageScaleMiddle] = 200
@@ -87,10 +82,6 @@ func (f FileFactory) getScaleWidthMap(fileType model2.FileType) map[model.ImageS
 		result[model.ImageScaleLarge] = 1200
 		break
 	case model2.FileTypeOpenCommission:
-		result[model.ImageScaleMiddle] = 300
-		result[model.ImageScaleMiddle] = 100
-		break
-	case model2.FileTypeOpenCommissionHidden:
 		result[model.ImageScaleMiddle] = 300
 		result[model.ImageScaleMiddle] = 100
 		break
@@ -107,9 +98,7 @@ func (f FileFactory) isPublic(fileType model2.FileType) bool {
 	case model2.FileTypeMessage,
 	model2.FileTypeCompletion,
 	model2.FileTypeCommissionRef,
-	model2.FileTypeCommissionProofCopy,
-	model2.FileTypeArtworkHidden,
-	model2.FileTypeOpenCommissionHidden:
+	model2.FileTypeCommissionProofCopy:
 		return false
 	default:
 		return true

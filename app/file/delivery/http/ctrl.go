@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"pixstall-file/domain/file"
+	"pixstall-file/domain/file/model"
 )
 
 type FileController struct {
@@ -21,22 +22,27 @@ func NewFileController(useCase file.UseCase) FileController {
 
 func (i FileController)GetFile(ctx *gin.Context) {
 	tokenUserID := ctx.GetString("userId")
-	imgName := ctx.Param("imgName")
-	if imgName == "" {
+	fileType := ctx.Param("fileType")
+	if fileType == "" {
 		ctx.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	ext := filepath.Ext(imgName)
+	fileName := ctx.Param("fileName")
+	if fileName == "" {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+	ext := filepath.Ext(fileName)
 	if ext == "" {
 		ctx.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	prefix := imgName[0:len(imgName) - len(ext)]
+	prefix := fileName[0:len(fileName) - len(ext)]
 	if prefix == "" {
 		ctx.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	accessible, err := i.useCase.IsAccessible(ctx, &tokenUserID, prefix, ext, ctx.FullPath())
+	accessible, err := i.useCase.IsAccessible(ctx, &tokenUserID, model.FileType(fileType), prefix)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return

@@ -1,10 +1,11 @@
 package model
 
 type FileACL struct {
-	ID    string
-	Owner string
-	ACL   []string
-	State FileState
+	ID       string
+	Owner    string
+	ACL      map[string]bool
+	IsPublic bool
+	State    FileState
 }
 
 type FileState string

@@ -6,6 +6,7 @@ import (
 	error2 "pixstall-file/domain/error"
 	"pixstall-file/domain/file"
 	"pixstall-file/domain/file/acl"
+	"pixstall-file/domain/file/acl/model"
 	model2 "pixstall-file/domain/file/model"
 	image_processing "pixstall-file/domain/image/image-processing"
 )
@@ -24,7 +25,7 @@ func NewFileUseCase(fileRepo file.Repo, fileAclRepo acl.Repo, imageProcessingRep
 	}
 }
 
-func (f fileUseCase) SaveFile(ctx context.Context, fileData *[]byte, fileType model2.FileType, name string) (*string, error) {
+func (f fileUseCase) SaveFile(ctx context.Context, fileData *[]byte, fileType model2.FileType, name string, owner string, acl []string) (*string, error) {
 
 	files, err := NewFileFactory(fileType, f.imageProcessingRepo).getFiles(fileData, fileType, name)
 	if err != nil || len(*files) <= 0 {
@@ -36,11 +37,68 @@ func (f fileUseCase) SaveFile(ctx context.Context, fileData *[]byte, fileType mo
 		return nil, error2.UnknownError
 	}
 	log.Printf("SaveFile into paths:%v\n", paths)
+	aclMap := make(map[string]bool)
+	for _, v := range acl {
+		aclMap[v] = true
+	}
+	fileACL := model.FileACL{
+		ID:    dFiles[0].ID,
+		Owner: owner,
+		ACL:   aclMap,
+		IsPublic: f.isInitialPublic(fileType),
+		State: model.FileStateActive,
+	}
+	_, err = f.fileAclRepo.AddFileACL(ctx, fileACL)
+	if err != nil {
+		return nil, err
+	}
 
 	return &dFiles[0].RawPath, nil
 }
 
-func (f fileUseCase) IsAccessible(ctx context.Context, userID *string, prefix string, ext string, fullPath string) (*bool, error) {
-	result := true
+func (f fileUseCase) IsAccessible(ctx context.Context, accessUserID *string, fileType model2.FileType, prefix string) (*bool, error) {
+	if !fileType.IsValid() {
+		return nil, error2.NotFoundError
+	}
+	if f.isPermanentPublic(fileType) {
+		result := true
+		return &result, nil
+	}
+	fileAcl, err := f.fileAclRepo.GetFileACL(ctx, prefix)
+	if err != nil {
+		return nil, err
+	}
+	if fileAcl.IsPublic || *accessUserID == fileAcl.Owner {
+		result := true
+		return &result, nil
+	}
+	if _, ok := fileAcl.ACL[*accessUserID]; ok {
+		result := true
+		return &result, nil
+	}
+
+	result := false
 	return &result, nil
+}
+
+func (f fileUseCase) isInitialPublic(fileType model2.FileType) bool {
+	switch fileType {
+	case model2.FileTypeArtwork,
+	model2.FileTypeRoof,
+	model2.FileTypeOpenCommission,
+	model2.FileTypeProfile:
+		return true
+	default:
+		return false
+	}
+}
+
+func (f fileUseCase) isPermanentPublic(fileType model2.FileType) bool {
+	switch fileType {
+	case model2.FileTypeRoof,
+		model2.FileTypeProfile:
+		return true
+	default:
+		return false
+	}
 }

@@ -67,13 +67,13 @@ func main() {
 	r := gin.Default()
 	//userIDExtractor := middleware.NewJWTPayloadsExtractor([]string{"userId"})
 
-	imgGroup := r.Group("/pri-img")
+	imgGroup := r.Group("/img")
 	{
 		ctrl := InitImageController(db, awsS3)
 		imgGroup.GET("/:imgType/:yyyy/:mm/:dd/:imgName", ctrl.GetImage)
 	}
 
-	fileGroup := r.Group("/pri-file")
+	fileGroup := r.Group("/file")
 	{
 		ctrl := InitFileController(db, awsS3)
 		fileGroup.GET("/:fileType/:yyyy/:mm/:dd/:fileName", ctrl.GetFile)

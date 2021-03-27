@@ -17,35 +17,46 @@ type File struct {
 type FileType string
 
 const (
-	FileTypeMessage              = "msg"
-	FileTypeCompletion           = "completion"
-	FileTypeCommissionRef        = "commission-ref"
-	FileTypeCommissionProofCopy  = "commission-proof-copy"
-	FileTypeArtworkHidden        = "artwork-hidden"
-	FileTypeArtwork              = "artwork"
-	FileTypeRoof                 = "roof"
-	FileTypeOpenCommission       = "open-commission"
-	FileTypeOpenCommissionHidden = "open-commission-hidden"
-	FileTypeProfile              = "profile"
+	FileTypeMessage             = "msg"
+	FileTypeCompletion          = "completion"
+	FileTypeCommissionRef       = "commission-ref"
+	FileTypeCommissionProofCopy = "commission-proof-copy"
+	FileTypeArtwork             = "artwork"
+	FileTypeRoof                = "roof"
+	FileTypeOpenCommission      = "open-commission"
+	FileTypeProfile             = "profile"
 )
+
+func (f FileType) IsValid() bool {
+	switch f {
+	case FileTypeMessage,
+		FileTypeCompletion,
+		FileTypeCommissionRef,
+		FileTypeCommissionProofCopy,
+		FileTypeArtwork,
+		FileTypeRoof,
+		FileTypeOpenCommission,
+		FileTypeProfile:
+		return true
+	default:
+		return false
+	}
+}
 
 func (f FileType) GetFileDir() string {
 	result := ""
 	switch f {
 	case FileTypeMessage:
-		result = "pri-img/msg/"
+		result = "img/msg/"
 		break
 	case FileTypeCompletion:
-		result = "pri-file/completion/"
+		result = "file/completion/"
 		break
 	case FileTypeCommissionRef:
-		result = "pri-img/commission-ref/"
+		result = "img/commission-ref/"
 		break
 	case FileTypeCommissionProofCopy:
-		result = "pri-img/commission-proof-copy/"
-		break
-	case FileTypeArtworkHidden:
-		result = "pri-img/artwork/"
+		result = "img/commission-proof-copy/"
 		break
 	case FileTypeArtwork:
 		result = "img/artwork/"
@@ -55,9 +66,6 @@ func (f FileType) GetFileDir() string {
 		break
 	case FileTypeOpenCommission:
 		result = "img/open-commission"
-		break
-	case FileTypeOpenCommissionHidden:
-		result = "img/open-commission-hidden"
 		break
 	case FileTypeProfile:
 		result = "img/profile"

@@ -9,15 +9,17 @@ type FileACL struct {
 	ObjectID primitive.ObjectID `bson:"_id,omitempty"`
 	ID       string             `bson:"id"`
 	Owner    string             `bson:"owner"`
-	ACL      []string           `bson:"acl"`
+	ACL      map[string]bool    `bson:"acl"`
+	IsPublic bool               `bson:"isPublic"`
 	State    model.FileState    `bson:"state"`
 }
 
 func (f FileACL) ToDomainFileAcl() model.FileACL {
 	return model.FileACL{
-		ID:    f.ID,
-		Owner: f.Owner,
-		ACL:   f.ACL,
-		State: f.State,
+		ID:       f.ID,
+		Owner:    f.Owner,
+		ACL:      f.ACL,
+		IsPublic: f.IsPublic,
+		State:    f.State,
 	}
 }
