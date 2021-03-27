@@ -45,7 +45,6 @@ func (f fileUseCase) SaveFile(ctx context.Context, fileData *[]byte, fileType mo
 		ID:    dFiles[0].ID,
 		Owner: owner,
 		ACL:   aclMap,
-		IsPublic: f.isInitialPublic(fileType),
 		State: model.FileStateActive,
 	}
 	_, err = f.fileAclRepo.AddFileACL(ctx, fileACL)
@@ -68,7 +67,11 @@ func (f fileUseCase) IsAccessible(ctx context.Context, accessUserID *string, fil
 	if err != nil {
 		return nil, err
 	}
-	if fileAcl.IsPublic || *accessUserID == fileAcl.Owner {
+	if *accessUserID == fileAcl.Owner {
+		result := true
+		return &result, nil
+	}
+	if _, ok := fileAcl.ACL["*"]; ok {
 		result := true
 		return &result, nil
 	}
@@ -76,7 +79,6 @@ func (f fileUseCase) IsAccessible(ctx context.Context, accessUserID *string, fil
 		result := true
 		return &result, nil
 	}
-
 	result := false
 	return &result, nil
 }

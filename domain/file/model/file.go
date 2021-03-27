@@ -9,7 +9,6 @@ type File struct {
 	Data        []byte
 	FileType    FileType
 	ContentType string
-	IsPublic    bool
 	Path        string
 	RawPath     string
 }

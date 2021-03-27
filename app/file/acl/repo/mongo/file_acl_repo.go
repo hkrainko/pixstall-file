@@ -48,7 +48,7 @@ func (m mongoFileAclRepo) AddFileACL(ctx context.Context, fileACL model.FileACL)
 
 func (m mongoFileAclRepo) GetFileACL(ctx context.Context, id string) (*model.FileACL, error) {
 	daoFileACL := dao.FileACL{}
-	err := m.collection.FindOne(ctx, bson.M{"id": id}, nil).Decode(&daoFileACL)
+	err := m.collection.FindOne(ctx, bson.M{"id": id}).Decode(&daoFileACL)
 	if err != nil {
 		switch err {
 		case mongo.ErrNoDocuments:

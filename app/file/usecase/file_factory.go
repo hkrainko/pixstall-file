@@ -10,13 +10,13 @@ import (
 )
 
 type FileFactory struct {
-	fileType model2.FileType
+	fileType            model2.FileType
 	imageProcessingRepo image_processing.Repo
 }
 
 func NewFileFactory(fileType model2.FileType, imageProcessingRepo image_processing.Repo) FileFactory {
 	return FileFactory{
-		fileType: fileType,
+		fileType:            fileType,
 		imageProcessingRepo: imageProcessingRepo,
 	}
 }
@@ -31,7 +31,6 @@ func (f FileFactory) getFiles(fileData *[]byte, fileType model2.FileType, name s
 		return nil, err
 	}
 	dir := f.fileType.GetFileDir()
-	isPublic := f.isPublic(fileType)
 	rawPath := dir + *newName + f.getFileExt(name)
 	var files []model2.File
 	for scale, width := range f.getScaleWidthMap(fileType) {
@@ -39,20 +38,20 @@ func (f FileFactory) getFiles(fileData *[]byte, fileType model2.FileType, name s
 			return nil, err
 		} else {
 			files = append(files, model2.File{
+				ID:          *newName,
 				Data:        b,
 				FileType:    fileType,
 				ContentType: "image/jpeg",
-				IsPublic:    isPublic,
 				Path:        dir + *newName + scale.PathSuffix() + ".jpg",
 				RawPath:     rawPath,
 			})
 		}
 	}
 	files = append(files, model2.File{
+		ID:          *newName,
 		Data:        *fileData,
 		FileType:    fileType,
 		ContentType: contentType,
-		IsPublic:    isPublic,
 		Path:        rawPath,
 		RawPath:     rawPath,
 	})
@@ -93,24 +92,12 @@ func (f FileFactory) getScaleWidthMap(fileType model2.FileType) map[model.ImageS
 	return result
 }
 
-func (f FileFactory) isPublic(fileType model2.FileType) bool {
-	switch fileType {
-	case model2.FileTypeMessage,
-	model2.FileTypeCompletion,
-	model2.FileTypeCommissionRef,
-	model2.FileTypeCommissionProofCopy:
-		return false
-	default:
-		return true
-	}
-}
-
 func (f FileFactory) getFileExt(name string) string {
 	ss := strings.Split(name, ".")
 	if len(ss) <= 1 {
 		return ""
 	}
-	return "." + ss[len(ss) - 1]
+	return "." + ss[len(ss)-1]
 }
 
 func (f FileFactory) getRandomName() (*string, error) {

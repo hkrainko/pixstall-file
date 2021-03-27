@@ -4,7 +4,6 @@ type FileACL struct {
 	ID       string
 	Owner    string
 	ACL      map[string]bool
-	IsPublic bool
 	State    FileState
 }
 
