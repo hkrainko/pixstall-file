@@ -18,8 +18,12 @@ const (
 )
 
 func main() {
-
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+	////gRPC
+	//lis, err := net.Listen("tcp", ":50052")
+	//s := grpc.NewServer()
+	//proto.RegisterFileServiceServer(s, )
 
 	//AWS s3
 	awsAccessKey := "AKIA5BWICLKRWX6ARSEF"
@@ -90,40 +94,6 @@ func main() {
 		//	}
 		//	c.Data(http.StatusOK, *out.ContentType, b)
 		//	return
-
-
-
-
-			//remote, err := url.Parse("https://pixstall-store-dev.s3.ap-east-1.amazonaws.com")
-			//if err != nil {
-			//	panic(err)
-			//}
-			//
-			//proxy := httputil.NewSingleHostReverseProxy(remote)
-			////Define the director func
-			////This is a good place to log, for example
-			//proxy.Director = func(req *http.Request) {
-			//	req.Header = c.Request.Header
-			//	req.Host = remote.Host
-			//	req.URL.Scheme = remote.Scheme
-			//	req.URL.Host = remote.Host
-			//	//req.URL.Path = c.Param("proxyPath")
-			//	req.RequestURI = c.Request.RequestURI
-			//}
-			//
-			//proxy.ServeHTTP(c.Writer, c.Request)
-		//})
-
-
-		//ctrl := InitArtistController(db, awsS3)
-		//// Artist
-		//artistGroup.GET("/:id", ctrl.GetArtist)
-		//artistGroup.GET("/:id/details", userIDExtractor.ExtractPayloadsFromJWT, ctrl.GetArtistDetails)
-		//artistGroup.PATCH("/:id", userIDExtractor.ExtractPayloadsFromJWT, ctrl.UpdateArtist)
-		//// Open Commission
-		//artistGroup.GET("/:id/open-commissions", ctrl.GetOpenCommissionsForArtist)
-		//artistGroup.GET("/:id/open-commissions/details", userIDExtractor.ExtractPayloadsFromJWT, ctrl.GetOpenCommissionsDetailsForArtist)
-		//artistGroup.POST("/:id/open-commissions", userIDExtractor.ExtractPayloadsFromJWT, ctrl.AddOpenCommissionForArtist)
 	}
 
 	completionFileGroup := r.Group("/file")

@@ -7,6 +7,7 @@ import (
 	"github.com/google/wire"
 	"go.mongodb.org/mongo-driver/mongo"
 	acl_repo "pixstall-file/app/file/acl/repo/mongo"
+	"pixstall-file/app/file/delivery/gRPC"
 	file_deli "pixstall-file/app/file/delivery/http"
 	file_repo "pixstall-file/app/file/repo/aws-s3"
 	file_usecase "pixstall-file/app/file/usecase"
@@ -23,6 +24,16 @@ func InitImageController(db *mongo.Database, awsS3 *s3.S3) image_deli.ImageContr
 		acl_repo.NewMongoFileAclRepo,
 	)
 	return image_deli.ImageController{}
+}
+
+func InitFileStoreService(db *mongo.Database, awsS3 *s3.S3) gRPC.FileService {
+	wire.Build(
+		gRPC.NewFileService,
+		image_usecase.NewImageUseCase,
+		file_repo.NewAWSS3FileRepository,
+		acl_repo.NewMongoFileAclRepo,
+	)
+	return gRPC.FileService{}
 }
 
 func InitFileController(db *mongo.Database, awsS3 *s3.S3) file_deli.FileController {

@@ -16,10 +16,12 @@ message MetaData {
     Message = 0;
     Completion = 1;
     CommissionRefImg = 2;
-    Artwork = 3;
-    Roof = 4;
-    OpenCommission = 5;
-    Profile = 6;
+    ArtworkHidden = 3;
+    Artwork = 4;
+    Roof = 5;
+    OpenCommission = 6;
+    OpenCommissionHidden = 7;
+    Profile = 8;
   }
 }
 
