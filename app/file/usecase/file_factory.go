@@ -21,8 +21,8 @@ func NewFileFactory(fileType model2.FileType, imageProcessingRepo image_processi
 	}
 }
 
-func (f FileFactory) getFiles(fileData *[]byte, fileType model2.FileType, ext string) (*[]model2.File, error) {
-	name, err := f.getRandomName()
+func (f FileFactory) getFiles(fileData *[]byte, fileType model2.FileType, name string) (*[]model2.File, error) {
+	newName, err := f.getRandomName()
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func (f FileFactory) getFiles(fileData *[]byte, fileType model2.FileType, ext st
 	}
 	dir := f.fileType.GetFileDir()
 	isPublic := f.isPublic(fileType)
-	rawPath := dir + *name + "." + ext
+	rawPath := dir + *newName + f.getFileExt(name)
 	var files []model2.File
 	for scale, width := range f.getScaleWidthMap(fileType) {
 		if b, err := f.imageProcessingRepo.ResizeToJpegByte(*fileData, width, 0); err != nil {
@@ -43,7 +43,7 @@ func (f FileFactory) getFiles(fileData *[]byte, fileType model2.FileType, ext st
 				FileType:    fileType,
 				ContentType: "image/jpeg",
 				IsPublic:    isPublic,
-				Path:        dir + *name + scale.PathSuffix() + ".jpg",
+				Path:        dir + *newName + scale.PathSuffix() + ".jpg",
 				RawPath:     rawPath,
 			})
 		}
@@ -114,6 +114,14 @@ func (f FileFactory) isPublic(fileType model2.FileType) bool {
 	default:
 		return true
 	}
+}
+
+func (f FileFactory) getFileExt(name string) string {
+	ss := strings.Split(name, ".")
+	if len(ss) <= 1 {
+		return ""
+	}
+	return "." + ss[len(ss) - 1]
 }
 
 func (f FileFactory) getRandomName() (*string, error) {

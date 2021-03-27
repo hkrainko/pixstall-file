@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"context"
-	"fmt"
+	"log"
 	error2 "pixstall-file/domain/error"
 	"pixstall-file/domain/file"
 	"pixstall-file/domain/file/acl"
@@ -24,9 +24,9 @@ func NewFileUseCase(fileRepo file.Repo, fileAclRepo acl.Repo, imageProcessingRep
 	}
 }
 
-func (f fileUseCase) SaveFile(ctx context.Context, fileData *[]byte, fileType model2.FileType, ext string) (*string, error) {
+func (f fileUseCase) SaveFile(ctx context.Context, fileData *[]byte, fileType model2.FileType, name string) (*string, error) {
 
-	files, err := NewFileFactory(fileType, f.imageProcessingRepo).getFiles(fileData, fileType, ext)
+	files, err := NewFileFactory(fileType, f.imageProcessingRepo).getFiles(fileData, fileType, name)
 	if err != nil || len(*files) <= 0 {
 		return nil, error2.UnknownError
 	}
@@ -35,7 +35,7 @@ func (f fileUseCase) SaveFile(ctx context.Context, fileData *[]byte, fileType mo
 	if err != nil {
 		return nil, error2.UnknownError
 	}
-	fmt.Printf("SaveFile into paths:%v", paths)
+	log.Printf("SaveFile into paths:%v\n", paths)
 
 	return &dFiles[0].RawPath, nil
 }

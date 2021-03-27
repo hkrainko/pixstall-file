@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"io"
+	"log"
 	"pixstall-file/domain/file"
 	"pixstall-file/domain/file/model"
 	"pixstall-file/proto"
@@ -46,11 +46,11 @@ func (f FileService) SaveFile(stream proto.FileService_SaveFileServer) error {
 			recFile := buf.Bytes()
 
 
-			path, err := f.fileUseCase.SaveFile(ctx, &recFile, fileType, metaData.Ext)
+			path, err := f.fileUseCase.SaveFile(ctx, &recFile, fileType, metaData.Name)
 			if err != nil {
 				return err
 			}
-			fmt.Printf("SaveFile used: %v(s)", endTime.Sub(startTime))
+			log.Printf("SaveFile used: %v(s)\n", endTime.Sub(startTime))
 			return stream.SendAndClose(&proto.SaveFileResponse{
 				Path: *path,
 			})

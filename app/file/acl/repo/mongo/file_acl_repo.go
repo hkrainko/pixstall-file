@@ -2,10 +2,10 @@ package mongo
 
 import (
 	"context"
-	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"log"
 	"pixstall-file/app/file/acl/repo/mongo/dao"
 	error2 "pixstall-file/domain/error"
 	"pixstall-file/domain/file/acl"
@@ -38,10 +38,10 @@ func (m mongoFileAclRepo) AddFileACL(ctx context.Context, fileACL model.FileACL)
 	}
 	result, err := m.collection.InsertOne(ctx, daoFileACL)
 	if err != nil {
-		fmt.Printf("AddFileACL error %v\n", err)
+		log.Printf("AddFileACL error %v\n", err)
 		return nil, err
 	}
-	fmt.Printf("AddFileACL %v", result.InsertedID)
+	log.Printf("AddFileACL %v\n", result.InsertedID)
 	dFileACL := daoFileACL.ToDomainFileAcl()
 	return &dFileACL.ID, nil
 }
