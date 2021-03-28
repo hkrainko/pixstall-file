@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"log"
 	"net"
+	"pixstall-file/app/middleware"
 	"pixstall-file/proto"
 	"time"
 )
@@ -65,18 +66,18 @@ func main() {
 
 	// Gin
 	r := gin.Default()
-	//userIDExtractor := middleware.NewJWTPayloadsExtractor([]string{"userId"})
+	userIDExtractor := middleware.NewJWTPayloadsExtractor("userId")
 
 	imgGroup := r.Group("/img")
 	{
 		ctrl := InitImageController(db, awsS3)
-		imgGroup.GET("/:imgType/:yyyy/:mm/:dd/:imgName", ctrl.GetImage)
+		imgGroup.GET("/:imgType/:yyyy/:mm/:dd/:imgName", userIDExtractor.ExtractPayloadsFromJWTInHeader, ctrl.GetImage)
 	}
 
 	fileGroup := r.Group("/file")
 	{
 		ctrl := InitFileController(db, awsS3)
-		fileGroup.GET("/:fileType/:yyyy/:mm/:dd/:fileName", ctrl.GetFile)
+		fileGroup.GET("/:fileType/:yyyy/:mm/:dd/:fileName", userIDExtractor.ExtractPayloadsFromJWTInHeader, ctrl.GetFile)
 	}
 
 	err = r.Run(":9007")

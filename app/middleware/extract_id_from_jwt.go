@@ -1,75 +1,52 @@
 package middleware
 
 import (
-	"encoding/base64"
-	"encoding/json"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
 )
 
-type JWTPayloadsExtractor struct {
-	Keys []string
+type APIClaims struct {
+	UserID string `json:"userId"`
+	jwt.StandardClaims
 }
 
-func NewJWTPayloadsExtractor(keys []string) *JWTPayloadsExtractor {
+type JWTPayloadsExtractor struct {
+	Key       string
+	SecretKey []byte
+}
+
+func NewJWTPayloadsExtractor(key string) *JWTPayloadsExtractor {
 	return &JWTPayloadsExtractor{
-		Keys: keys,
+		Key:      key,
+		SecretKey: []byte("nBcWcVKTRiiUT0iaahFBFskAlugkP5GX"),
 	}
 }
 
 func (j *JWTPayloadsExtractor) ExtractPayloadsFromJWTInHeader(c *gin.Context) {
-	jwtToken := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
-	payload := j.getPayloadPartFromFullToken(jwtToken)
-	if payload == nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
+	bearerToken := c.GetHeader("Authorization")
+	if bearerToken == "" {
+		c.Next()
 		return
 	}
-	j.passTokenToNext(c, *payload)
-}
-
-func (j *JWTPayloadsExtractor) ExtractPayloadsFromJWTInQuery(c *gin.Context) {
-	jwtToken := c.Query("access_token")
-	payload := j.getPayloadPartFromFullToken(jwtToken)
-	if payload == nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-	j.passTokenToNext(c, *payload)
-}
-
-
-// Private
-func (j *JWTPayloadsExtractor) getPayloadPartFromFullToken(token string) *string {
-	ss := strings.Split(token, ".")
-	if len(ss) != 3 {
-		return nil
-	}
-	return &ss[1]
-}
-
-func (j *JWTPayloadsExtractor) passTokenToNext(c *gin.Context, token string) {
-	b, err := base64.RawStdEncoding.DecodeString(token)
-	if b == nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-
-	var nMap map[string]interface{}
-	err = json.Unmarshal(b, &nMap)
+	jwtToken := strings.TrimPrefix(bearerToken, "Bearer ")
+	token, err := jwt.ParseWithClaims(
+		jwtToken,
+		&APIClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			return j.SecretKey, nil
+		},
+	)
 	if err != nil {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
-	for _, key := range j.Keys {
-		if nMap[key] != nil {
-			if v, ok := nMap[key].(string); ok {
-				c.Set(key, v)
-			}
-		}
+	if claims, ok := token.Claims.(*APIClaims); ok && token.Valid {
+		c.Set(j.Key, claims.UserID)
+		c.Next()
+	} else {
+		c.AbortWithStatus(http.StatusUnauthorized)
 	}
-	c.Next()
 }
-
-type JWTPayload map[string]string
