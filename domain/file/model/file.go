@@ -64,10 +64,10 @@ func (f FileType) GetFileDir() string {
 		result = "img/roof/"
 		break
 	case FileTypeOpenCommission:
-		result = "img/open-commission"
+		result = "img/open-commission/"
 		break
 	case FileTypeProfile:
-		result = "img/profile"
+		result = "img/profile/"
 		break
 	}
 

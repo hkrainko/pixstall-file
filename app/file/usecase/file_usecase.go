@@ -9,6 +9,7 @@ import (
 	"pixstall-file/domain/file/acl/model"
 	model2 "pixstall-file/domain/file/model"
 	image_processing "pixstall-file/domain/image/image-processing"
+	"strings"
 )
 
 type fileUseCase struct {
@@ -63,7 +64,8 @@ func (f fileUseCase) IsAccessible(ctx context.Context, accessUserID *string, fil
 		result := true
 		return &result, nil
 	}
-	fileAcl, err := f.fileAclRepo.GetFileACL(ctx, prefix)
+	fileID := f.removeSizeSuffix(prefix)
+	fileAcl, err := f.fileAclRepo.GetFileACL(ctx, fileID)
 	if err != nil {
 		return nil, err
 	}
@@ -103,4 +105,12 @@ func (f fileUseCase) isPermanentPublic(fileType model2.FileType) bool {
 	default:
 		return false
 	}
+}
+
+func (f fileUseCase) removeSizeSuffix(prefix string) string {
+	ss := strings.Split(prefix, "_")
+	if len(ss) <= 1 {
+		return prefix
+	}
+	return ss[0]
 }
