@@ -62,31 +62,31 @@ func (f FileFactory) getScaleWidthMap(fileType model2.FileType) map[model.ImageS
 	result := make(map[model.ImageScale]int)
 	switch fileType {
 	case model2.FileTypeMessage:
-		result[model.ImageScaleMiddle] = 200
+		result[model.ImageScaleMiddle] = 400
 		break
 	case model2.FileTypeCompletion:
 		break
 	case model2.FileTypeCommissionRef:
-		result[model.ImageScaleMiddle] = 200
+		result[model.ImageScaleMiddle] = 400
 		break
 	case model2.FileTypeCommissionProofCopy:
-		result[model.ImageScaleMiddle] = 200
+		result[model.ImageScaleMiddle] = 400
 		break
 	case model2.FileTypeArtwork:
-		result[model.ImageScaleLarge] = 600
-		result[model.ImageScaleMiddle] = 200
-		result[model.ImageScaleSmall] = 50
+		result[model.ImageScaleLarge] = 1200
+		result[model.ImageScaleMiddle] = 600
+		result[model.ImageScaleSmall] = 200
 		break
 	case model2.FileTypeRoof:
 		result[model.ImageScaleLarge] = 1200
 		break
 	case model2.FileTypeOpenCommission:
-		result[model.ImageScaleMiddle] = 300
-		result[model.ImageScaleSmall] = 100
+		result[model.ImageScaleMiddle] = 600
+		result[model.ImageScaleSmall] = 200
 		break
 	case model2.FileTypeProfile:
-		result[model.ImageScaleMiddle] = 200
-		result[model.ImageScaleSmall] = 50
+		result[model.ImageScaleMiddle] = 400
+		result[model.ImageScaleSmall] = 100
 		break
 	}
 	return result
