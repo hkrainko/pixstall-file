@@ -26,8 +26,8 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
 	//AWS s3
-	awsAccessKey := "AKIA5BWICLKRWX6ARSEF"
-	awsSecret := "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"
+	awsAccessKey := "AKIA5BWICLKRXCHNGRWC"
+	awsSecret := "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"
 	token := ""
 	creds := credentials.NewStaticCredentials(awsAccessKey, awsSecret, token)
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
