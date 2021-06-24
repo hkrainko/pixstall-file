@@ -78,6 +78,7 @@ func (f FileFactory) getScaleWidthMap(fileType model2.FileType) map[model.ImageS
 		result[model.ImageScaleSmall] = 200
 		break
 	case model2.FileTypeRoof:
+		result[model.ImageScaleMiddle] = 600
 		result[model.ImageScaleLarge] = 1200
 		break
 	case model2.FileTypeOpenCommission:
